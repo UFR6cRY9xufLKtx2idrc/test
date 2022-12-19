@@ -1,9 +1,12 @@
 {
-    "log": {
-        "loglevel": "none"
+    "dns": {
+        "servers": [
+            "https+local://8.8.8.8/dns-query",
+            "https+local://8.8.4.4/dns-query"
+        ]
     },
     "inbounds": [
-        {   
+        {
             "listen": "/etc/caddy/vmess,0644",
             "protocol": "vmess",
             "settings": {
@@ -11,14 +14,12 @@
                     {
                         "id": "$AUUID"
                     }
-                ],
-                "disableInsecureEncryption": true
+                ]
             },
             "streamSettings": {
                 "network": "ws",
-                "allowInsecure": false,
                 "wsSettings": {
-                  "path": "/$AUUID-vmess"
+                    "path": "/$AUUID-vmess"
                 }
             },
             "sniffing": {
@@ -29,105 +30,21 @@
                 ]
             }
         },
-        {   
+        {
             "listen": "/etc/caddy/vless,0644",
             "protocol": "vless",
             "settings": {
                 "clients": [
                     {
-                        "id": "$AUUID",
-                        "level": 0,
-                        "email": "love@v2fly.org"
+                        "id": "$AUUID"
                     }
                 ],
                 "decryption": "none"
             },
             "streamSettings": {
                 "network": "ws",
-                "allowInsecure": false,
                 "wsSettings": {
-                  "path": "/$AUUID-vless"
-                }
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls"
-                ]
-            }
-        },
-        {   
-            "listen": "127.0.0.1",
-            "port": 4324,
-            "protocol": "shadowsocks",
-            "settings": {
-                "email": "love@v2fly.org",
-                "method": "$ParameterSSENCYPT",
-                "password":"$AUUID",
-                "network": "tcp,udp",
-                "ivCheck": true
-            },
-            "streamSettings": {
-                "network": "ws",
-                "security": "none",
-                "wsSettings": {
-                    "path": "/$AUUID-ss"
-                }
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls"
-                ]
-            }
-        },
-        {   
-            "listen": "127.0.0.1",
-            "port": 5234,
-            "protocol": "socks",
-            "settings": {
-                "auth": "password",
-                "accounts": [
-                    {
-                        "user": "$AUUID",
-                        "pass": "$AUUID"
-                    }
-                ]
-            },
-            "streamSettings": {
-                "network": "ws",
-                "wsSettings": {
-                  "path": "/$AUUID-socks"
-                }
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls"
-                ]
-            }
-        },
-        {   
-            "listen": "/etc/caddy/trojan,0644",
-            "protocol": "trojan",
-            "settings": {
-                "clients": [
-                    {
-                        "password":"$AUUID",
-                        "level": 0,
-                        "email": "love@v2fly.org"
-                    }
-                ],
-                "decryption": "none"
-            },
-            "streamSettings": {
-                "network": "ws",
-                "allowInsecure": false,
-                "wsSettings": {
-                  "path": "/$AUUID-trojan"
+                    "path": "/$AUUID-vless"
                 }
             },
             "sniffing": {
@@ -139,88 +56,40 @@
             }
         }
     ],
-    "routing": {
-        "domainStrategy": "IPIfNonMatch",
-        "domainMatcher": "hybrid",
-        "rules": [
-           {
-              "type": "field",
-              "domains": [
-                  "geosite:category-ads-all"
-              ],
-              "outboundTag": "block"
-           },
-           {
-              "type": "field",
-              "outboundTag":
-                  "sockstor",
-                  "domains": [
-                      "geosite:tor"
-                  ]
-           },
-           {
-              "type": "field",
-              "domains": [
-                  "geosite:cn"
-              ],
-              "outboundTag": "direct"
-           },
-           {
-              "type": "field",
-              "protocol": [
-                 "bittorrent"
-              ],
-              "outboundTag": "direct"
-           },
-           {
-              "type": "field",
-              "ip": [
-                  "geoip:cn",
-                  "geoip:private"
-              ],
-              "outboundTag": "direct"
-           }
-        ]
+    "log": {
+        "loglevel": "none",
+        "access": "none",
+        "error": "none"
     },
     "outbounds": [
         {
             "protocol": "freedom",
             "settings": {
-                "domainStrategy": "UseIPv4",
-                "userLevel": 0
+                "domainStrategy": "UseIP"
             },
             "tag": "direct"
         },
         {
             "protocol": "blackhole",
-            "tag": "block"
-        },
-        {
-            "protocol": "socks",
-            "tag": "sockstor",
             "settings": {
-                "servers": [
-                    {
-                        "address": "127.0.0.1",
-                        "port": 9050
-                    }
-                ]
-            }
+            },
+            "tag": "blocked"
         }
     ],
-    "dns": {
-        "servers": [
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
             {
-                "address": "https+local://dns.google/dns-query",
-                "address": "https+local://cloudflare-dns.com/dns-query",
-                "domains": [
-                    "geosite:geolocation-!cn"
+                "domain": [
+                    "geosite:category-ads-all",
+                    "geosite:private"
                 ],
-                "skipFallback": true
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "blocked",
+                "type": "field"
             }
-        ],
-        "queryStrategy": "UseIPv4",
-        "disableCache": true,
-        "disableFallbackIfMatch": false
+        ]
     }
 }
