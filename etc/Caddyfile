@@ -2,16 +2,18 @@
 root * /usr/share/caddy
 file_server browse
 
-tls internal
-
 header {
-    Permissions-Policy interest-cohort=()
-    Strict-Transport-Security max-age=31536000;
-    X-Robots-Tag none
-    X-Content-Type-Options nosniff
-    X-XSS-Protection "1; mode=block;"
-    X-Frame-Options DENY
-    Referrer-Policy no-referrer-when-downgrade
+    Permissions-Policy "interest-cohort=()"
+    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    X-Robots-Tag "none"
+    X-Content-Type-Options "nosniff"
+    X-XSS-Protection "1; mode=block"
+    X-Frame-Options "DENY"
+    Content-Security-Policy "upgrade-insecure-requests"
+    Referrer-Policy "same-origin"
+    X-Download-Options "noopen"
+    X-DNS-Prefetch-Control "off"
+    X-Permitted-Cross-Domain-Policies "none"
     -Server
     -Hidden
 }
@@ -27,7 +29,6 @@ path /$AUUID-vmess
 }
 reverse_proxy @websocket_xray_vmess unix//etc/caddy/vmess
 
-
 @websocket_xray_vless {
 header Connection *Upgrade*
 header Upgrade    websocket
@@ -35,15 +36,6 @@ path /$AUUID-vless
 }
 reverse_proxy @websocket_xray_vless unix//etc/caddy/vless
 
-@websocket_xray_trojan {
-header Connection *Upgrade*
-header Upgrade    websocket
-path /$AUUID-trojan
-}
-reverse_proxy @websocket_xray_trojan unix//etc/caddy/trojan
-
-@websocket_xray_ss {
-header Connection *Upgrade*
 header Upgrade    websocket
 path /$AUUID-ss
 }
