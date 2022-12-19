@@ -35,7 +35,3 @@ header Upgrade    websocket
 path /$AUUID-vless
 }
 reverse_proxy @websocket_xray_vless unix//etc/caddy/vless
-
-path /$AUUID-socks
-}
-reverse_proxy @websocket_xray_socks 127.0.0.1:5234
